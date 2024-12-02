@@ -1,52 +1,60 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAccessToken } from "../context/AccessTokenContext";
 
+const stockCodes = ["005930", "000660", "035420"]; // 컴포넌트 외부로 이동하여 변경이 없는 값으로 유지
+
 const StockComponent = () => {
   const accessToken = useAccessToken();
   const [stockData, setStockData] = useState([]);
-  const stockCodes = ["005930", "000660", "035420"]; // 삼성전자, SK하이닉스, NAVER
 
   const fetchStockData = useCallback(async () => {
-    if (!accessToken) return;
+    if (!accessToken) {
+      console.log("No access token available, skipping fetchStockData.");
+      return;
+    }
 
     try {
+      console.log("Fetching stock data with access token:", accessToken);
       const stocks = await Promise.all(
         stockCodes.map(async (code) => {
-          // GET 요청에 필요한 데이터를 URL의 쿼리 파라미터로 전달
-          const url = `/api/uapi/domestic-stock/v1/quotations/search-stock-inf`;
-          
-          const response = await fetch(url, {
-            method: "GET",
+          const response = await fetch("/api/rates", {
+            method: "POST",
             headers: {
-              "Content-Type": "application/json; charset=utf-8", 
-              Authorization: `Bearer ${accessToken}`,            
-              appkey: process.env.REACT_APP_KIS_KEY,             
-              appsecret: process.env.REACT_APP_KIS_SECRET,       
-              tr_id: "CTPF1604R",                                
-              custtype: "P",                                     
+              "Content-Type": "application/json; charset=utf-8",
+              Authorization: `Bearer ${accessToken}`,
+              appkey: process.env.REACT_APP_KIS_KEY,
+              appsecret: process.env.REACT_APP_KIS_SECRET,
+              tr_id: "CTPF1604R",
+              custtype: "P",
             },
             body: JSON.stringify({
               PRDT_TYPE_CD: "300",
-              PDNO: code
+              PDNO: code,
             }),
           });
-          
+
           if (!response.ok) {
-            throw new Error(`Failed to fetch data for code: ${code}`);
+            throw new Error(`Failed to fetch data for code: ${code}. Status: ${response.status}`);
           }
 
-          return await response.json();
+          const stockData = await response.json();
+          console.log(`Data for stock code ${code}:`, stockData);
+          return stockData;
         })
       );
+      console.log("All stock data fetched successfully:", stocks);
       setStockData(stocks);
     } catch (error) {
       console.error("Failed to fetch stock data:", error);
     }
-  }, [accessToken, JSON.stringify(stockCodes)]);
+  }, [accessToken]); // stockCodes를 의존성에서 제거
 
   useEffect(() => {
     if (accessToken) {
+      console.log("Access token available, fetching stock data...");
       fetchStockData();
+    } else {
+      console.log("No access token yet, waiting...");
     }
   }, [accessToken, fetchStockData]);
 
