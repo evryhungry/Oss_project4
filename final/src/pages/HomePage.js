@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import StockComponent from "./StockComponent";
+import StockComponent from "../components/StockComponent";
 
 const HomePage = () => {
   return (
