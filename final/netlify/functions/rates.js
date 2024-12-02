@@ -1,20 +1,42 @@
-const axios = require('axios');
+const axios = require("axios");
 
-exports.handler = async function (event, context) {
-    const API_KEY =  process.env.REACT_APP_KIS_ACCESS; // 한국은행 API 키
-    const API_URL = `https://ecos.bok.or.kr/api/StatisticSearch/${API_KEY}/json/kr/1/104/902Y006/M/202403/202406`;
+const API_BASE_URL = "https://openapi.koreainvestment.com:9443";
+const APP_KEY = process.env.REACT_KIS_APP_KEY;
+const APP_SECRET = process.env.REACT_KIS_APP_SECRET;
 
-    try {
-        const response = await axios.get(API_URL);
-        return {
-            statusCode: 200,
-            body: JSON.stringify(response.data),
-        };
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to fetch data from API' }),
-        };
+exports.handler = async (event) => {
+  try {
+    const { path, method, body } = JSON.parse(event.body);
+
+    let response;
+    if (method === "POST") {
+      response = await axios.post(`${API_BASE_URL}${path}`, body, {
+        headers: {
+          "Content-Type": "application/json",
+          appkey: APP_KEY,
+          appsecret: APP_SECRET,
+        },
+      });
+    } else if (method === "GET") {
+      response = await axios.get(`${API_BASE_URL}${path}`, {
+        headers: {
+          "Content-Type": "application/json",
+          appkey: APP_KEY,
+          Authorization: `Bearer ${body.accessToken}`,
+        },
+        params: body.params,
+      });
     }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(response.data),
+    };
+  } catch (error) {
+    console.error("Error:", error.message);
+    return {
+      statusCode: error.response?.status || 500,
+      body: JSON.stringify({ message: error.message }),
+    };
+  }
 };

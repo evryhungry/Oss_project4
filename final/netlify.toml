@@ -1,8 +1,11 @@
 [build]
-  functions = "netlify/functions"
+  command = "npm run build"
   publish = "build"
 
+[functions]
+  directory = "netlify/functions"
+
 [[redirects]]
-  from = "/api/rates"
+  from = "/api/*"
   to = "/.netlify/functions/rates"
   status = 200
