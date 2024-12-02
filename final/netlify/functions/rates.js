@@ -22,6 +22,7 @@ exports.handler = async (event) => {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
           appkey: APP_KEY,
+          appsecret: APP_SECRET,
           Authorization: `Bearer ${body.accessToken}`,
           tr_id: body.tr_id,
           custtype: body.custtype,
