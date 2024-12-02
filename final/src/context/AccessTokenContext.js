@@ -7,7 +7,7 @@ export const AccessTokenProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchToken = async () => {
-      const response = await fetch("/api/rates", {
+      const response = await fetch("/api/oauth2/tokenP", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -17,6 +17,8 @@ export const AccessTokenProvider = ({ children }) => {
           method: "POST",
           body: {
             grant_type: "client_credentials",
+            appkey: process.env.REACT_APP_KIS_KEY,        
+            appsecret: process.env.REACT_APP_KIS_SECRET,
           },
         }),
       });

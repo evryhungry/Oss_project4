@@ -2,32 +2,39 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAccessToken } from "../context/AccessTokenContext";
 
 const StockComponent = () => {
-  // accessToken을 함수처럼 호출하지 말고, 그냥 변수로 사용합니다.
   const accessToken = useAccessToken();
   const [stockData, setStockData] = useState([]);
   const stockCodes = ["005930", "000660", "035420"]; // 삼성전자, SK하이닉스, NAVER
 
   const fetchStockData = useCallback(async () => {
     if (!accessToken) return;
-  
+
     try {
       const stocks = await Promise.all(
         stockCodes.map(async (code) => {
-          const response = await fetch("/api/rates", {
+          // GET 요청에 필요한 데이터를 URL의 쿼리 파라미터로 전달
+          const url = `/api/uapi/domestic-stock/v1/quotations/search-stock-inf`;
+          
+          const response = await fetch(url, {
             method: "GET",
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json; charset=utf-8", 
+              Authorization: `Bearer ${accessToken}`,            
+              appkey: process.env.REACT_APP_KIS_KEY,             
+              appsecret: process.env.REACT_APP_KIS_SECRET,       
+              tr_id: "CTPF1604R",                                
+              custtype: "P",                                     
             },
             body: JSON.stringify({
-              path: "/uapi/domestic-stock/v1/quotations/search-stock-inf",
-              method: "GET",
-              body: {
-                accessToken,
-                params: { PRDT_TYPE_CD: "300", PDNO: code },
-              },
+              PRDT_TYPE_CD: "300",
+              PDNO: code
             }),
           });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch data for code: ${code}`);
+          }
+
           return await response.json();
         })
       );
@@ -35,8 +42,7 @@ const StockComponent = () => {
     } catch (error) {
       console.error("Failed to fetch stock data:", error);
     }
-  }, [accessToken, stockCodes]);
-  
+  }, [accessToken, JSON.stringify(stockCodes)]);
 
   useEffect(() => {
     if (accessToken) {
