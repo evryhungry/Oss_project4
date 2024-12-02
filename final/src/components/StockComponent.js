@@ -17,8 +17,8 @@ const StockComponent = () => {
       console.log("Fetching stock data with access token:", accessToken);
       const stocks = await Promise.all(
         stockCodes.map(async (code) => {
-          const response = await fetch("/api/rates", {
-            method: "POST",
+          const response = await fetch("/api/uapi/domestic-stock/v1/quotations/search-stock-info", {
+            method: "GET",
             headers: {
               "Content-Type": "application/json; charset=utf-8",
               Authorization: `Bearer ${accessToken}`,
@@ -55,7 +55,7 @@ const StockComponent = () => {
       const response = await fetch("/api/oauth2/tokenP", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
         },
         body: JSON.stringify({
           grant_type: "client_credentials",
@@ -75,7 +75,7 @@ const StockComponent = () => {
       console.error("Error fetching access token:", error);
     }
   };
-  
+
   useEffect(() => {
     if (accessToken) {
       console.log("Access token available, fetching stock data...");
@@ -93,7 +93,7 @@ const StockComponent = () => {
         <ul>
           {stockData.map((stock, index) => (
             <li key={index}>
-              종목 이름: {stock.stck_nm}, 현재가: {stock.stck_prpr}원
+              종목 이름: {stock.prdt_name}, 현재가: {stock.stck_prpr}원
             </li>
           ))}
         </ul>

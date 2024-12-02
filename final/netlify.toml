@@ -7,6 +7,6 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/rates"
   status = 200
   force = true
