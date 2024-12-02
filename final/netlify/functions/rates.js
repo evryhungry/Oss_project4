@@ -1,8 +1,8 @@
 const axios = require("axios");
 
 const API_BASE_URL = "https://openapi.koreainvestment.com:9443";
-const APP_KEY = process.env.REACT_KIS_APP_KEY;
-const APP_SECRET = process.env.REACT_KIS_APP_SECRET;
+const APP_KEY = process.env.REACT_APP_KIS_KEY;
+const APP_SECRET = process.env.REACT_APP_KIS_SECRET;
 
 exports.handler = async (event) => {
   try {
