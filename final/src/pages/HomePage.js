@@ -3,14 +3,15 @@ import axios from 'axios';
 
 const HomePage = () => {
     const [latestRates, setLatestRates] = useState([]);
-    const API_KEY = process.env.REACT_APP_KIS_ACCESS;
-    
-    const BASE_URL = `https://ecos.bok.or.kr/api/StatisticSearch/${API_KEY}/json/kr/1/100/902Y006/M/202403/202406`;
+    //local
+    // const PROXY_URL = 'http://localhost:5000/api/rates';
+    //배포
+    const PROXY_URL = '/api/rates';
 
     useEffect(() => {
         const fetchRates = async () => {
             try {
-                const response = await axios.get(BASE_URL);
+                const response = await axios.get(PROXY_URL);
                 const rawData = response.data.StatisticSearch.row;
                 const latestData = getLatestRates(rawData);
                 setLatestRates(latestData);
@@ -32,7 +33,7 @@ const HomePage = () => {
 
         const latestRates = Object.keys(groupedData).map((countryCode) => {
             const countryRecords = groupedData[countryCode];
-            countryRecords.sort((a, b) => parseInt(b.TIME) - parseInt(a.TIME)); // 최신 데이터가 맨 앞으로
+            countryRecords.sort((a, b) => parseInt(b.TIME) - parseInt(a.TIME));
             return {
                 countryCode,
                 countryName: countryRecords[0].ITEM_NAME1,
