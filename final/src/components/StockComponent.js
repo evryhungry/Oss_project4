@@ -49,12 +49,40 @@ const StockComponent = () => {
     }
   }, [accessToken]); // stockCodes를 의존성에서 제거
 
+  const fetchAccessToken = async () => {
+    try {
+      console.log("Fetching new access token...");
+      const response = await fetch("/api/oauth2/tokenP", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          grant_type: "client_credentials",
+          appkey: process.env.REACT_APP_KIS_KEY,
+          appsecret: process.env.REACT_APP_KIS_SECRET,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch access token. Status: " + response.status);
+      }
+
+      const data = await response.json();
+      console.log("Access token fetched successfully:", data.access_token);
+      // 여기에 AccessTokenContext를 업데이트하는 로직 추가 필요 (예: setAccessToken 사용)
+    } catch (error) {
+      console.error("Error fetching access token:", error);
+    }
+  };
+  
   useEffect(() => {
     if (accessToken) {
       console.log("Access token available, fetching stock data...");
       fetchStockData();
     } else {
       console.log("No access token yet, waiting...");
+      fetchAccessToken();
     }
   }, [accessToken, fetchStockData]);
 
