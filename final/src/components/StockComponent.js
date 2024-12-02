@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAccessToken } from "../context/AccessTokenContext";
 
 const StockComponent = () => {
+  // accessToken을 함수처럼 호출하지 말고, 그냥 변수로 사용합니다.
   const accessToken = useAccessToken();
   const [stockData, setStockData] = useState([]);
   const stockCodes = ["005930", "000660", "035420"]; // 삼성전자, SK하이닉스, NAVER
@@ -13,7 +14,7 @@ const StockComponent = () => {
       const stocks = await Promise.all(
         stockCodes.map(async (code) => {
           const response = await fetch("/api/rates", {
-            method: "POST",
+            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${accessToken}`,
