@@ -2,40 +2,24 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AccessTokenContext = createContext();
 
-export const AccessTokenProvider = ({ children }) => {
-  const [accessToken, setAccessToken] = useState(null);
-
-  useEffect(() => {
-    const fetchToken = async () => {
-      const response = await fetch("/.netlify/functions/rates", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          path: "/oauth2/tokenP",
-          method: "POST",
-          body: {
-            grant_type: "client_credentials",
-          },
-        }),
-      });
-      const data = await response.json();
-      setAccessToken(data.access_token);
-    };
-
-    fetchToken();
-    const interval = setInterval(fetchToken, 30 * 60 * 1000); // 30분마다 갱신
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <AccessTokenContext.Provider value={accessToken}>
-      {children}
-    </AccessTokenContext.Provider>
-  );
+const fetchAccessToken = async () => {
+  try {
+    const response = await fetch("https://openapi.koreainvestment.com:9443/oauth2/tokenP", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        grant_type: "client_credentials",
+        appkey: "YOUR_APP_KEY",
+        appsecret: "YOUR_APP_SECRET",
+      }),
+    });
+    const data = await response.json();
+    return data.access_token;
+  } catch (error) {
+    console.error("Failed to fetch access token:", error);
+    return null;
+  }
 };
 
-export const useAccessToken = () => {
-  return useContext(AccessTokenContext);
-};

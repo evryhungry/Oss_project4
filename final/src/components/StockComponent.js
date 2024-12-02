@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAccessToken } from "../context/AccessTokenContext";
 
 const StockComponent = () => {
@@ -6,34 +6,42 @@ const StockComponent = () => {
   const [stockData, setStockData] = useState([]);
   const stockCodes = ["005930", "000660", "035420"]; // 삼성전자, SK하이닉스, NAVER
 
-  const fetchStockData = async () => {
-    const stocks = await Promise.all(
-      stockCodes.map(async (code) => {
-        const response = await fetch("/.netlify/functions/rates", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            path: "/uapi/domestic-stock/v1/quotations/search-stock-inf",
-            method: "GET",
-            body: {
-              accessToken,
-              params: { PRDT_TYPE_CD: "300", PDNO: code },
+  const fetchStockData = useCallback(async () => {
+    if (!accessToken) return;
+  
+    try {
+      const stocks = await Promise.all(
+        stockCodes.map(async (code) => {
+          const response = await fetch("/api/rates", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
             },
-          }),
-        });
-        return await response.json();
-      })
-    );
-    setStockData(stocks);
-  };
+            body: JSON.stringify({
+              path: "/uapi/domestic-stock/v1/quotations/search-stock-inf",
+              method: "GET",
+              body: {
+                accessToken,
+                params: { PRDT_TYPE_CD: "300", PDNO: code },
+              },
+            }),
+          });
+          return await response.json();
+        })
+      );
+      setStockData(stocks);
+    } catch (error) {
+      console.error("Failed to fetch stock data:", error);
+    }
+  }, [accessToken, stockCodes]);
+  
 
   useEffect(() => {
     if (accessToken) {
       fetchStockData();
     }
-  }, [accessToken]);
+  }, [accessToken, fetchStockData]);
 
   return (
     <div>
