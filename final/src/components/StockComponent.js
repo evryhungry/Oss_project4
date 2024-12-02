@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAccessToken } from "../context/AccessTokenContext";
 
-const stockCodes = ["005930", "000660", "035420"]; // 컴포넌트 외부로 이동하여 변경이 없는 값으로 유지
+const stockCodes = ["005930", "000660", "035420"];
 
 const StockComponent = () => {
   const accessToken = useAccessToken();
@@ -27,10 +27,10 @@ const StockComponent = () => {
               tr_id: "CTPF1604R",
               custtype: "P",
             },
-            body: JSON.stringify({
+            params: {
               PRDT_TYPE_CD: "300",
               PDNO: code,
-            }),
+            },
           });
 
           if (!response.ok) {
@@ -47,7 +47,7 @@ const StockComponent = () => {
     } catch (error) {
       console.error("Failed to fetch stock data:", error);
     }
-  }, [accessToken]); // stockCodes를 의존성에서 제거
+  }, [accessToken]);
 
   const fetchAccessToken = async () => {
     try {

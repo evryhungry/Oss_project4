@@ -12,7 +12,7 @@ exports.handler = async (event) => {
     if (method === "POST") {
       response = await axios.post(`${API_BASE_URL}${path}`, body, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
           appkey: APP_KEY,
           appsecret: APP_SECRET,
         },
@@ -20,9 +20,11 @@ exports.handler = async (event) => {
     } else if (method === "GET") {
       response = await axios.get(`${API_BASE_URL}${path}`, {
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
           appkey: APP_KEY,
           Authorization: `Bearer ${body.accessToken}`,
+          tr_id: body.tr_id,
+          custtype: body.custtype,
         },
         params: body.params,
       });
