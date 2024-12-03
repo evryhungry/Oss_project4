@@ -7,11 +7,12 @@ const APP_SECRET = process.env.REACT_APP_KIS_SECRET;
 exports.handler = async (event) => {
   try {
     const { path, method, body } = JSON.parse(event.body);
+    console.log(`${API_BASE_URL}${path}`);
 
     let response;
     if (method === "POST") {
       response = await axios.post(`${API_BASE_URL}${path}`, body, {
-        
+
       });
     } else if (method === "GET") {
       response = await axios.get(`${API_BASE_URL}${path}`, {
