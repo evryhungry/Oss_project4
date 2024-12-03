@@ -8,12 +8,17 @@ export const AccessTokenProvider = ({ children }) => {
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        console.log(process.env.REACT_APP_KIS_KEY);
-        console.log(process.env.REACT_APP_KIS_SECRET);
-        console.log("/api/outh2/tokenP")
+        console.log("Fetching environment variables...");
+        console.log("APP_KEY:", process.env.REACT_APP_KIS_KEY);
+        console.log("APP_SECRET:", process.env.REACT_APP_KIS_SECRET);
+        console.log("API endpoint: /api/oauth2/tokenP");
+
         console.log("Fetching access token...");
         const response = await fetch("/api/oauth2/tokenP", {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json; charset=utf-8", // 헤더 추가
+          },
           body: JSON.stringify({
             grant_type: "client_credentials",
             appkey: process.env.REACT_APP_KIS_KEY,
