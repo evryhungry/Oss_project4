@@ -54,9 +54,6 @@ const StockComponent = () => {
       console.log("Fetching new access token...");
       const response = await fetch("/api/oauth2/tokenP", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
         body: JSON.stringify({
           grant_type: "client_credentials",
           appkey: process.env.REACT_APP_KIS_KEY,
