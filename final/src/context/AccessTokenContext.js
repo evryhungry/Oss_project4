@@ -8,6 +8,9 @@ export const AccessTokenProvider = ({ children }) => {
   useEffect(() => {
     const fetchToken = async () => {
       try {
+        console.log(process.env.REACT_APP_KIS_KEY);
+        console.log(process.env.REACT_APP_KIS_SECRET);
+        console.log("/api/outh2/tokenP")
         console.log("Fetching access token...");
         const response = await fetch("/api/oauth2/tokenP", {
           method: "POST",
