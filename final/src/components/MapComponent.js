@@ -1,6 +1,7 @@
 import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 const customIcon = new L.Icon({
   iconUrl: 'https://example.com/your-icon.png', // 여기에 원하는 이미지 URL 입력
