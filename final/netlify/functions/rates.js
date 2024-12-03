@@ -11,11 +11,7 @@ exports.handler = async (event) => {
     let response;
     if (method === "POST") {
       response = await axios.post(`${API_BASE_URL}${path}`, body, {
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          appkey: APP_KEY,
-          appsecret: APP_SECRET,
-        },
+        
       });
     } else if (method === "GET") {
       response = await axios.get(`${API_BASE_URL}${path}`, {
