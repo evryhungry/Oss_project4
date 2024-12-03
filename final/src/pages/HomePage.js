@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import MapComponent from "../components/MapComponent";
-import InfoPanel from "../components/infoPanel";
+import InfoPanel from "../components/InfoPanel";
 
 const HomePage = () => {
   const [latestRates, setLatestRates] = useState([]); // 최신 금리 데이터
