@@ -2,22 +2,51 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 .App {
-  text-align: center;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.info-panel {
-  margin-top: 20px;
-  background: #f9f9f9;
+header {
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+}
+
+header nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.stock-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.stock-list li {
+  border: 1px solid #ddd;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.stock-list li a {
+  text-decoration: none;
+  color: #333;
+}
+
+.stock-detail {
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  display: inline-block;
-}
-
-.info-panel p {
-  margin: 5px 0;
+  margin-top: 20px;
+  width: 600px;
 }

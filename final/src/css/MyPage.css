@@ -1,0 +1,47 @@
+/* MyPage Styles */
+.my-page {
+  background-color: #fff;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 600px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.my-page h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.my-page p {
+  font-size: 1rem;
+  margin: 10px 0;
+}
+
+.my-page ul {
+  list-style: none;
+  padding: 0;
+}
+
+.my-page li {
+  background-color: #ecf0f1;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.my-page li a {
+  font-weight: bold;
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.my-page li a:hover {
+  color: #3498db;
+}
+
+.my-page span {
+  font-weight: bold;
+}
