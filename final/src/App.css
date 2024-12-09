@@ -1,52 +1,138 @@
+/* App.css */
+
+/* 전체 페이지 스타일 */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-.App {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-header {
-  width: 100%;
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  text-align: center;
-}
-
-header nav a {
-  color: white;
-  text-decoration: none;
-  margin: 0 10px;
-}
-
-.stock-list ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.stock-list li {
-  border: 1px solid #ddd;
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.stock-list li a {
-  text-decoration: none;
+  background-color: #f4f4f9;
   color: #333;
 }
 
-.stock-detail {
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #2d6cdf;
+}
+
+nav {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #2d6cdf;
+  font-weight: bold;
+  margin: 0 15px;
+}
+
+nav a:hover {
+  color: #1a4cbf;
+}
+
+/* 공통 박스 스타일 */
+.card {
+  background-color: white;
   border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background: #ffffff;
+  margin: 10px 0;
+  padding: 10px;
   border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+li a {
+  color: #2d6cdf;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+li a:hover {
+  text-decoration: underline;
+}
+
+/* 버튼 스타일 */
+button {
+  background-color: #2d6cdf;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+button:hover {
+  background-color: #1a4cbf;
+}
+
+/* 표 스타일 */
+table {
+  width: 100%;
+  border-collapse: collapse;
   margin-top: 20px;
-  width: 600px;
+}
+
+th, td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+th {
+  background-color: #2d6cdf;
+  color: white;
+}
+
+td {
+  background-color: #f9f9f9;
+}
+
+/* 그래프 상자 */
+.chart-container {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.dashboard {
+  display: flex;
+  gap: 20px; /* 왼쪽과 오른쪽 사이 간격 */
+}
+
+/* 메인 컨텐츠 (차트 부분) */
+.main {
+  flex: 2; /* 더 넓은 공간 할당 */
+  padding: 20px;
+}
+
+/* 사이드바 (주식 리스트) */
+.sidebar {
+  flex: 1; /* 좁은 공간 할당 */
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

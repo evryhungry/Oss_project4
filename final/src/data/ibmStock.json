@@ -1,4 +1,4 @@
-const stockData = {
+{
   "Meta Data": {
       "1. Information": "Daily Prices (open, high, low, close) and Volumes",
       "2. Symbol": "IBM",
@@ -580,20 +580,6 @@ const stockData = {
             "3. low": "187.0000",
             "4. close": "192.6100",
             "5. volume": "3712698"
-        },
+        }
     }
   }
-
-
-
-
-// AAPL (Apple Inc.): 아이폰, 맥북 등 소비자 전자제품과 소프트웨어를 제공하는 세계 최대 기업 중 하나.
-// MSFT (Microsoft Corporation): Windows 운영 체제와 Office 소프트웨어로 유명한 글로벌 테크 기업.
-// GOOG (Alphabet Inc.): Google 검색엔진과 광고 사업을 기반으로 하는 대기업.
-// AMZN (Amazon.com Inc.): 전자상거래와 AWS 클라우드 컴퓨팅 서비스로 유명.
-// TSLA (Tesla Inc.): 전기차와 배터리 기술로 혁신을 주도하는 기업.
-// FB (Meta Platforms Inc.): Facebook, Instagram 등을 운영하는 소셜 미디어 대기업.
-// NVDA (NVIDIA Corporation): 그래픽 처리 장치(GPU)와 AI 기술 개발 선도 기업.
-// BRK.B (Berkshire Hathaway Inc. Class B): 워렌 버핏이 이끄는 투자 지주회사.
-// JPM (JPMorgan Chase & Co.): 미국 최대 은행 중 하나로 금융 서비스 제공.
-// NFLX (Netflix Inc.): 글로벌 스트리밍 서비스 리더.

@@ -1,0 +1,82 @@
+.trade-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.trade-header {
+  display: flex;
+  justify-content: space-around;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.trade-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f5f5f5;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.trade-tab.active {
+  background-color: #8884d8;
+  color: white;
+}
+
+.trade-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.trade-info {
+  flex: 2;
+  font-size: 14px;
+  color: #333;
+}
+
+.trade-input {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.buy-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.sell-button {
+  background-color: #f44336;
+  color: white;
+}
