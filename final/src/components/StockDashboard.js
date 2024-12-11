@@ -7,12 +7,13 @@ import axios from "axios";
 const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio }) => {
   const [selectedStock, setSelectedStock] = useState({ name: "Apple", symbol: "AAPL" });
   const [chartData, setChartData] = useState([]);
-  const [companyInfo, setCompanyInfo] = useState(null); // 회사 정보 상태 추가
+  const [companyInfo, setCompanyInfo] = useState(null);  // 회사 정보 상태 추가
   const [loading, setLoading] = useState(false);
+  const [mockAPIStocks, setMockAPIStocks] = useState([]);
 
-  const STOCK_API_KEY = "DXW4T0AN8RCFEIEA"; // Alpha Vantage API 키
+  const STOCK_API_KEY = "DXW4T0AN8RCFEIEA";
   const STOCK_API_URL = "https://www.alphavantage.co/query";
-  const MOCK_API_URL = "https://672818db270bd0b9755452f8.mockapi.io/api/vi/infos"; // MockAPI URL
+  const MOCK_API_URL = "https://672818db270bd0b9755452f8.mockapi.io/api/vi/infos";
 
   const fetchStockData = async (symbol) => {
     setLoading(true);
@@ -33,21 +34,30 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
     }
   };
 
+  const fetchMockAPIStocks = async () => {
+    try {
+      const response = await axios.get(MOCK_API_URL);
+      setMockAPIStocks(response.data);
+    } catch (error) {
+      console.error("Error fetching MockAPI stocks:", error);
+    }
+  };
+
   const fetchCompanyInfo = async (name) => {
     try {
       const response = await axios.get(MOCK_API_URL);
       const companies = response.data;
       const info = companies.find((company) => company.name === name);
-      setCompanyInfo(info);
+      setCompanyInfo(info);  // 회사 정보 상태 업데이트
     } catch (error) {
       console.error("Error fetching company info:", error);
     }
   };
 
   useEffect(() => {
-    // 초기 데이터 로드 (Apple 데이터 및 정보)
     fetchStockData("AAPL");
     fetchCompanyInfo("Apple");
+    fetchMockAPIStocks();
   }, []);
 
   const handleStockChange = (stock) => {
@@ -59,19 +69,54 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
   const latestPrice = chartData.length > 0 ? chartData[0].close : 0;
   const maxPurchasable = Math.floor(balance / latestPrice);
 
+  const getAvailableStockQuantity = (stockName) => {
+    const stockData = mockAPIStocks.find((stock) => stock.name === stockName);
+    return stockData ? stockData.EA : 0;
+  };
+
   const handleTrade = (type, quantity, totalPrice) => {
+    const availableQuantity = getAvailableStockQuantity(selectedStock.name);
+
     if (type === "buy" && balance >= totalPrice) {
-      onUpdatePortfolio((prev) => ({
-        ...prev,
-        [selectedStock.name]: (prev[selectedStock.name] || 0) + quantity,
-      }));
+      onUpdatePortfolio((prev) => {
+        const currentStock = prev[selectedStock.name] || { quantity: 0, totalSpent: 0 };
+        const newQuantity = currentStock.quantity + quantity;
+        const newTotalSpent = currentStock.totalSpent + totalPrice;
+
+        return {
+          ...prev,
+          [selectedStock.name]: {
+            quantity: newQuantity,
+            totalSpent: newTotalSpent,
+          },
+        };
+      });
       onUpdateBalance(balance - totalPrice);
-    } else if (type === "sell" && portfolio[selectedStock.name] >= quantity) {
-      onUpdatePortfolio((prev) => ({
-        ...prev,
-        [selectedStock.name]: prev[selectedStock.name] - quantity,
-      }));
-      onUpdateBalance(balance + totalPrice);
+    } else if (type === "sell" && availableQuantity >= quantity) {
+      const stockData = mockAPIStocks.find((stock) => stock.name === selectedStock.name);
+      if (stockData) {
+        axios.put(`${MOCK_API_URL}/${stockData.id}`, {
+          ...stockData,
+          EA: stockData.EA - quantity,
+        }).then(() => {
+          onUpdatePortfolio((prev) => {
+            const currentStock = prev[selectedStock.name];
+            const newQuantity = currentStock.quantity - quantity;
+            const newTotalSpent = currentStock.totalSpent;
+
+            return {
+              ...prev,
+              [selectedStock.name]: {
+                quantity: newQuantity,
+                totalSpent: newTotalSpent,
+              },
+            };
+          });
+          onUpdateBalance(balance + totalPrice);
+        }).catch((error) => {
+          console.error("Error updating MockAPI stock:", error);
+        });
+      }
     } else {
       alert("Insufficient balance or stock quantity!");
     }
@@ -84,9 +129,7 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
 
   return (
     <div className="dashboard">
-      {/* 왼쪽 컨테이너 */}
       <div className="left-container">
-        {/* 차트 */}
         <div className="chart-container">
           <h2>{selectedStock.name} Stock Prices</h2>
           {loading ? (
@@ -109,7 +152,6 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
           )}
         </div>
 
-        {/* TradeForm */}
         <div className="trade-form-container">
           <TradeForm
             stockName={selectedStock.name}
@@ -117,31 +159,17 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
             balance={balance}
             portfolio={portfolio}
             onTrade={handleTrade}
+            stockInfo={companyInfo}  // 회사 정보 전달
           />
-          {/* 회사 정보 */}
-          {companyInfo && (
-            <div className="company-info">
-              <h3>회사 정보</h3>
-              <p><strong>상장 날짜:</strong> {companyInfo.launchDate}</p>
-              <p><strong>총 발행량:</strong> {companyInfo.totalSupply}</p>
-              <p><strong>시가총액:</strong> {companyInfo.marketCap}</p>
-              <p><strong>웹사이트:</strong> <a href={companyInfo.website} target="_blank" rel="noreferrer">{companyInfo.website}</a></p>
-              <p><strong>문의:</strong> {companyInfo.contact}</p>
-              <p><strong>자산 설명:</strong> {companyInfo.assetDescription}</p>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* 오른쪽 Stock List */}
       <div className="stock-list">
         <h3>Stock List</h3>
         {stocks.map((stock, index) => (
           <button
             key={index}
-            className={`stock-button ${
-              selectedStock.name === stock.name ? "active" : ""
-            }`}
+            className={`stock-button ${selectedStock.name === stock.name ? "active" : ""}`}
             onClick={() => handleStockChange(stock)}
           >
             {stock.name}
