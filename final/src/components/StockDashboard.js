@@ -4,16 +4,18 @@ import TradeForm from "./TradeForm";
 import "../css/StockDashboard.css";
 import axios from "axios";
 
-const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio }) => {
+const MOCK_INFO_URL = "https://672818db270bd0b9755452f8.mockapi.io/api/vi/infos";
+const MOCK_STOCKS_URL = "https://675082c469dc1669ec1b75a8.mockapi.io/api/stocks";
+
+const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio, mockStocks }) => {
   const [selectedStock, setSelectedStock] = useState({ name: "Apple", symbol: "AAPL" });
+  const [stocks, setStocks] = useState([]);
   const [chartData, setChartData] = useState([]);
-  const [companyInfo, setCompanyInfo] = useState(null);  // 회사 정보 상태 추가
+  const [companyInfo, setCompanyInfo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [mockAPIStocks, setMockAPIStocks] = useState([]);
 
   const STOCK_API_KEY = "DXW4T0AN8RCFEIEA";
   const STOCK_API_URL = "https://www.alphavantage.co/query";
-  const MOCK_API_URL = "https://672818db270bd0b9755452f8.mockapi.io/api/vi/infos";
 
   const fetchStockData = async (symbol) => {
     setLoading(true);
@@ -34,30 +36,34 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
     }
   };
 
-  const fetchMockAPIStocks = async () => {
+  const fetchCompanyInfo = async (name) => {
     try {
-      const response = await axios.get(MOCK_API_URL);
-      setMockAPIStocks(response.data);
+      const response = await axios.get(MOCK_INFO_URL);
+      const companies = response.data;
+      const info = companies.find((company) => company.name === name);
+      setCompanyInfo(info);
     } catch (error) {
-      console.error("Error fetching MockAPI stocks:", error);
+      console.error("Error fetching company info:", error);
     }
   };
 
-  const fetchCompanyInfo = async (name) => {
+  const fetchStocks = async () => {
     try {
-      const response = await axios.get(MOCK_API_URL);
-      const companies = response.data;
-      const info = companies.find((company) => company.name === name);
-      setCompanyInfo(info);  // 회사 정보 상태 업데이트
+      const response = await axios.get(MOCK_INFO_URL);
+      const filteredStocks = response.data.map((item) => ({
+        name: item.name,
+        symbol: item.symbol,
+      }));
+      setStocks(filteredStocks);
     } catch (error) {
-      console.error("Error fetching company info:", error);
+      console.error("Failed to fetch stocks:", error);
     }
   };
 
   useEffect(() => {
     fetchStockData("AAPL");
     fetchCompanyInfo("Apple");
-    fetchMockAPIStocks();
+    fetchStocks();
   }, []);
 
   const handleStockChange = (stock) => {
@@ -66,66 +72,72 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
     fetchCompanyInfo(stock.name);
   };
 
-  const latestPrice = chartData.length > 0 ? chartData[0].close : 0;
-  const maxPurchasable = Math.floor(balance / latestPrice);
-
-  const getAvailableStockQuantity = (stockName) => {
-    const stockData = mockAPIStocks.find((stock) => stock.name === stockName);
-    return stockData ? stockData.EA : 0;
-  };
-
-  const handleTrade = (type, quantity, totalPrice) => {
-    const availableQuantity = getAvailableStockQuantity(selectedStock.name);
-
+  const handleTrade = async (type, quantity) => {
+    const stockData = mockStocks.find((stock) => stock.name === selectedStock.name);
+  
+    if (!stockData) {
+      alert("유효하지 않은 주식 데이터입니다.");
+      return;
+    }
+  
+    const totalPrice = latestPrice * Number(quantity); // latestPrice로 계산
+    const totalEA = mockStocks
+      .filter((stock) => stock.name === selectedStock.name)
+      .reduce((acc, stock) => acc + stock.EA, 0); // totalEA 계산
+  
     if (type === "buy" && balance >= totalPrice) {
-      onUpdatePortfolio((prev) => {
-        const currentStock = prev[selectedStock.name] || { quantity: 0, totalSpent: 0 };
-        const newQuantity = currentStock.quantity + quantity;
-        const newTotalSpent = currentStock.totalSpent + totalPrice;
-
-        return {
+      // 매수 로직
+      try {
+        await axios.post(MOCK_STOCKS_URL, {
+          name: selectedStock.name,
+          price: latestPrice,
+          EA: quantity,
+          trading_time: new Date().toISOString(),
+          type: "buy",
+        });
+        onUpdatePortfolio((prev) => ({
           ...prev,
           [selectedStock.name]: {
-            quantity: newQuantity,
-            totalSpent: newTotalSpent,
+            quantity: (prev[selectedStock.name]?.quantity || 0) + quantity,
+            totalSpent: (prev[selectedStock.name]?.totalSpent || 0) + totalPrice,
           },
-        };
-      });
-      onUpdateBalance(balance - totalPrice);
-    } else if (type === "sell" && availableQuantity >= quantity) {
-      const stockData = mockAPIStocks.find((stock) => stock.name === selectedStock.name);
-      if (stockData) {
-        axios.put(`${MOCK_API_URL}/${stockData.id}`, {
-          ...stockData,
-          EA: stockData.EA - quantity,
-        }).then(() => {
-          onUpdatePortfolio((prev) => {
-            const currentStock = prev[selectedStock.name];
-            const newQuantity = currentStock.quantity - quantity;
-            const newTotalSpent = currentStock.totalSpent;
-
-            return {
-              ...prev,
-              [selectedStock.name]: {
-                quantity: newQuantity,
-                totalSpent: newTotalSpent,
-              },
-            };
-          });
-          onUpdateBalance(balance + totalPrice);
-        }).catch((error) => {
-          console.error("Error updating MockAPI stock:", error);
+        }));
+        onUpdateBalance(balance - totalPrice);
+      } catch (error) {
+        console.error("Error updating stock data:", error);
+      }
+    } else if (type === "sell" && totalEA >= quantity) {
+      // 매도 로직
+      try {
+        await axios.post(MOCK_STOCKS_URL, {
+          name: selectedStock.name,
+          price: latestPrice,
+          EA: -quantity,
+          trading_time: new Date().toISOString(),
+          type: "sell",
         });
+        onUpdatePortfolio((prev) => {
+          const current = prev[selectedStock.name];
+          return {
+            ...prev,
+            [selectedStock.name]: {
+              quantity: current.quantity - quantity,
+              totalSpent: current.totalSpent,
+            },
+          };
+        });
+        onUpdateBalance(balance + totalPrice);
+      } catch (error) {
+        console.error("Error updating stock data:", error);
       }
     } else {
-      alert("Insufficient balance or stock quantity!");
+      alert("잔액 부족 또는 매도 가능한 수량이 부족합니다!");
     }
   };
+  
 
-  const stocks = [
-    { name: "Apple", symbol: "AAPL" },
-    { name: "IBM", symbol: "IBM" },
-  ];
+  const latestPrice = chartData.length > 0 ? chartData[0].close : 0;
+
 
   return (
     <div className="dashboard">
@@ -151,7 +163,6 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
             </ResponsiveContainer>
           )}
         </div>
-
         <div className="trade-form-container">
           <TradeForm
             stockName={selectedStock.name}
@@ -159,11 +170,11 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
             balance={balance}
             portfolio={portfolio}
             onTrade={handleTrade}
-            stockInfo={companyInfo}  // 회사 정보 전달
+            stockInfo={companyInfo}
+            mockStocks={mockStocks}
           />
         </div>
       </div>
-
       <div className="stock-list">
         <h3>Stock List</h3>
         {stocks.map((stock, index) => (

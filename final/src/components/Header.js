@@ -1,62 +1,77 @@
-import React, { useState } from "react";
-import StockDashboard from "./StockDashboard"; // 주식 대시보드 컴포넌트
-import Portfolio from "./Portfolio"; // 포트폴리오 컴포넌트
-import "../css/Header.css"; // 스타일 파일
+import React, { useState, useEffect } from "react";
+import StockDashboard from "./StockDashboard";
+import Portfolio from "./Portfolio";
+import "../css/Header.css";
+import axios from "axios";
+
+const MOCK_INFO_URL = "https://672818db270bd0b9755452f8.mockapi.io/api/vi/infos";
+const MOCK_STOCKS_URL = "https://675082c469dc1669ec1b75a8.mockapi.io/api/stocks";
 
 const Header = () => {
-  // 상태 변수 설정: 초기 금액 10000으로 설정
-  const [balance, setBalance] = useState(10000); 
-
-  // 상태 변수 설정: 초기 포트폴리오는 Apple과 IBM 주식 수량 0으로 설정
-  const [portfolio, setPortfolio] = useState({ Apple: 0, IBM: 0 });
-
-  // 상태 변수 설정: 기본적으로 '거래소' 탭이 활성화된 상태로 설정
+  const [balance, setBalance] = useState(10000);
+  const [portfolio, setPortfolio] = useState({});
+  const [mockStocks, setMockStocks] = useState([]);
   const [activeTab, setActiveTab] = useState("거래소");
 
-  // 탭에 따라 내용을 렌더링하는 함수
+  // MockAPI에서 포트폴리오 데이터 초기화
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      try {
+        const response = await axios.get(MOCK_STOCKS_URL);
+        const portfolioData = response.data.reduce((acc, stock) => {
+          acc[stock.name] = {
+            quantity: stock.EA,
+            totalSpent: stock.totalSpent || 0,
+          };
+          return acc;
+        }, {});
+        setPortfolio(portfolioData);
+        setMockStocks(response.data);
+      } catch (error) {
+        console.error("Error fetching portfolio data:", error);
+      }
+    };
+    fetchPortfolio();
+  }, []);
+
   const renderContent = () => {
     if (activeTab === "거래소") {
-      // '거래소' 탭일 때 주식 대시보드를 렌더링
       return (
         <StockDashboard
-          balance={balance} // balance와 portfolio 상태를 전달
-          onUpdateBalance={setBalance} // balance를 업데이트할 함수 전달
-          portfolio={portfolio} // portfolio 상태를 전달
-          onUpdatePortfolio={setPortfolio} // portfolio를 업데이트할 함수 전달
+          balance={balance}
+          onUpdateBalance={setBalance}
+          portfolio={portfolio}
+          onUpdatePortfolio={setPortfolio}
+          mockStocks={mockStocks}
         />
       );
     } else if (activeTab === "투자내역") {
-      // '투자내역' 탭일 때 포트폴리오 정보를 렌더링
-      return <Portfolio portfolio={portfolio} />;
+      return <Portfolio portfolio={portfolio} mockStocks={mockStocks} />;
     }
   };
 
   return (
     <div className="header">
       <div className="header-logo">
-        <h1>UPstock</h1> {/* 웹사이트 로고 */}
+        <h1>UPstock</h1>
       </div>
       <div className="header-nav">
-        {/* 거래소 탭 버튼 */}
         <button
           className={`nav-button ${activeTab === "거래소" ? "active" : ""}`}
-          onClick={() => setActiveTab("거래소")} // 버튼 클릭 시 '거래소' 탭 활성화
+          onClick={() => setActiveTab("거래소")}
         >
           거래소
         </button>
-        {/* 투자내역 탭 버튼 */}
         <button
           className={`nav-button ${activeTab === "투자내역" ? "active" : ""}`}
-          onClick={() => setActiveTab("투자내역")} // 버튼 클릭 시 '투자내역' 탭 활성화
+          onClick={() => setActiveTab("투자내역")}
         >
           투자내역
         </button>
       </div>
-      <div className="header-content">
-        {renderContent()} {/* 현재 활성화된 탭에 맞는 내용을 렌더링 */}
-      </div>
+      <div className="header-content">{renderContent()}</div>
     </div>
   );
 };
 
-export default Header; // Header 컴포넌트 내보내기
+export default Header;

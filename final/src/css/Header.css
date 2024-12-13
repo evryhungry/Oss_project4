@@ -23,13 +23,13 @@
   font-size: 16px;
   cursor: pointer;
   border: none;
-  background-color: #8884d8;
+  background-color: #0062DF;
   color: white;
   border-radius: 5px;
 }
 
 .nav-button.active {
-  background-color: #5a5fb6;
+  background-color: #0C3887;
 }
 
 .header-content {

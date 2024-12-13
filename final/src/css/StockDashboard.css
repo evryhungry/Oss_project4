@@ -44,7 +44,7 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 14px;
   max-height: calc(100vh - 40px); /* 화면 높이에 맞춤 */
   overflow-y: auto; /* 스크롤 가능 */
   position: sticky; /* 스크롤 시 고정 */
@@ -67,15 +67,84 @@
 }
 
 .stock-list .stock-button.active {
-  background-color: #8884d8;
+  background-color: #0062DF;
   color: white;
   font-weight: bold;
 }
 
 .company-info {
-  margin-top: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  margin-top: 10px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fefefe;
+  font-family: 'Arial', sans-serif;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+.company-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.company-actions button {
+  margin-left: 10px;
+  padding: 5px 15px;
+  border: 1px solid #121212;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s ease;
+}
+
+.edit-button {
+  background-color: #0C3887;
+  color: white;
+}
+
+.delete-button {
+  background-color: white;
+  color: #0C3887;
+}
+
+.company-actions button:hover {
+  opacity: 0.8; 
+}
+
+.company-info h3 {
+  margin-top: 5px;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.company-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.company-details div {
+  flex: 1;
+}
+
+.company-details p {
+  margin: 5px 0;
+  font-size: 0.95em;
+  color: #555;
+}
+
+.company-description {
+  margin-top: 10px;
+  font-size: 0.9em;
+  line-height: 1.6;
+  color: #444;
+}
+
+.company-description strong {
+  color: #333;
+}
+

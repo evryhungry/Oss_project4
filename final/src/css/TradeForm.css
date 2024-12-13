@@ -17,17 +17,24 @@
   flex: 1;
   padding: 10px;
   text-align: center;
+  color: rgb(51, 51, 51);
   cursor: pointer;
   background-color: #f5f5f5;
   border: none;
   border-radius: 8px;
   font-size: 16px;
   font-weight: bold;
+  border-bottom: 1px solid rgb(212, 214, 220)
 }
 
-.trade-tab.active {
-  background-color: #8884d8;
-  color: white;
+.trade-tab.active.buy {
+  border-bottom: 4px solid #DD3C33;
+  color: #DD3C33;
+}
+
+.trade-tab.active.sell {
+  border-bottom: 4px solid #0062DF;
+  color: #0062DF;
 }
 
 .trade-content {
@@ -72,11 +79,23 @@
 }
 
 .buy-button {
-  background-color: #4caf50;
+  background-color: #DD3C33; /* 빨간색 */
   color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
 .sell-button {
-  background-color: #f44336;
+  background-color: #0062DF; /* 파란색 */
   color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
 }
+
+
