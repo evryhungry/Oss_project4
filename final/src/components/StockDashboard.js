@@ -12,13 +12,14 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
   const [stocks, setStocks] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [companyInfo, setCompanyInfo] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [currentStockInfo, setCurrentStockInfo] = useState(null);
 
   const STOCK_API_KEY = "DXW4T0AN8RCFEIEA";
   const STOCK_API_URL = "https://www.alphavantage.co/query";
 
   const fetchStockData = async (symbol) => {
-    setLoading(true);
     try {
       const response = await axios.get(
         `${STOCK_API_URL}?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${STOCK_API_KEY}`
@@ -31,8 +32,6 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
       setChartData(formattedData);
     } catch (error) {
       console.error("Error fetching stock data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -72,69 +71,39 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
     fetchCompanyInfo(stock.name);
   };
 
-  const handleTrade = async (type, quantity) => {
-    const stockData = mockStocks.find((stock) => stock.name === selectedStock.name);
-  
-    if (!stockData) {
-      alert("유효하지 않은 주식 데이터입니다.");
-      return;
-    }
-  
-    const totalPrice = latestPrice * Number(quantity); // latestPrice로 계산
-    const totalEA = mockStocks
-      .filter((stock) => stock.name === selectedStock.name)
-      .reduce((acc, stock) => acc + stock.EA, 0); // totalEA 계산
-  
-    if (type === "buy" && balance >= totalPrice) {
-      // 매수 로직
-      try {
-        await axios.post(MOCK_STOCKS_URL, {
-          name: selectedStock.name,
-          price: latestPrice,
-          EA: quantity,
-          trading_time: new Date().toISOString(),
-          type: "buy",
-        });
-        onUpdatePortfolio((prev) => ({
-          ...prev,
-          [selectedStock.name]: {
-            quantity: (prev[selectedStock.name]?.quantity || 0) + quantity,
-            totalSpent: (prev[selectedStock.name]?.totalSpent || 0) + totalPrice,
-          },
-        }));
-        onUpdateBalance(balance - totalPrice);
-      } catch (error) {
-        console.error("Error updating stock data:", error);
-      }
-    } else if (type === "sell" && totalEA >= quantity) {
-      // 매도 로직
-      try {
-        await axios.post(MOCK_STOCKS_URL, {
-          name: selectedStock.name,
-          price: latestPrice,
-          EA: -quantity,
-          trading_time: new Date().toISOString(),
-          type: "sell",
-        });
-        onUpdatePortfolio((prev) => {
-          const current = prev[selectedStock.name];
-          return {
-            ...prev,
-            [selectedStock.name]: {
-              quantity: current.quantity - quantity,
-              totalSpent: current.totalSpent,
-            },
-          };
-        });
-        onUpdateBalance(balance + totalPrice);
-      } catch (error) {
-        console.error("Error updating stock data:", error);
-      }
-    } else {
-      alert("잔액 부족 또는 매도 가능한 수량이 부족합니다!");
+  const handleEdit = (info) => {
+    setCurrentStockInfo(info);
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = (info) => {
+    setCurrentStockInfo(info);
+    setDeleteModalOpen(true);
+  };
+
+  const updateCompanyInfo = async () => {
+    try {
+      await axios.put(`${MOCK_INFO_URL}/${currentStockInfo.id}`, currentStockInfo);
+      alert("정보가 수정되었습니다.");
+      setEditModalOpen(false);
+      fetchCompanyInfo(currentStockInfo.name);
+    } catch (error) {
+      console.error("Error updating company info:", error);
+      alert("정보 수정 중 오류가 발생했습니다.");
     }
   };
-  
+
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`${MOCK_INFO_URL}/${currentStockInfo.id}`);
+      setCompanyInfo(null);
+      alert("삭제되었습니다.");
+    } catch (error) {
+      console.error("Error deleting stock info:", error);
+    } finally {
+      setDeleteModalOpen(false);
+    }
+  };
 
   const latestPrice = chartData.length > 0 ? chartData[0].close : 0;
 
@@ -144,24 +113,20 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
       <div className="left-container">
         <div className="chart-container">
           <h2>{selectedStock.name} Stock Prices</h2>
-          {loading ? (
-            <p>Loading stock data...</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                <YAxis
-                  domain={[
-                    Math.min(...chartData.map((d) => d.close)),
-                    Math.max(...chartData.map((d) => d.close)),
-                  ]}
-                  tickFormatter={(tick) => tick.toFixed(2)}
-                />
-                <Tooltip />
-                <Line type="monotone" dataKey="close" stroke="#8884d8" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={chartData}>
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis
+                domain={[
+                  Math.min(...chartData.map((d) => d.close)),
+                  Math.max(...chartData.map((d) => d.close)),
+                ]}
+                tickFormatter={(tick) => tick.toFixed(2)}
+              />
+              <Tooltip />
+              <Line type="monotone" dataKey="close" stroke="#8884d8" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
         <div className="trade-form-container">
           <TradeForm
@@ -169,9 +134,11 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
             stockPrice={latestPrice}
             balance={balance}
             portfolio={portfolio}
-            onTrade={handleTrade}
+            onTrade={() => {}}
             stockInfo={companyInfo}
             mockStocks={mockStocks}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
           />
         </div>
       </div>
@@ -186,7 +153,77 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
             {stock.name}
           </button>
         ))}
+
+        <p className="more-symbols">
+          더 많은 심볼을 보고 싶다면 <br />
+          <a
+            href="https://namu.wiki/w/%ED%8B%B0%EC%BB%A4"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            이곳으로!
+          </a>
+        </p>
       </div>
+      {editModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>정보 수정</h3>
+            <form>
+              <div>
+                <label htmlFor="name">회사 이름:</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={currentStockInfo?.name || ""}
+                  onChange={(e) => setCurrentStockInfo({ ...currentStockInfo, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label htmlFor="launchDate">설립일:</label>
+                <input
+                  type="date"
+                  id="launchDate"
+                  value={currentStockInfo?.launchDate || ""}
+                  onChange={(e) => setCurrentStockInfo({ ...currentStockInfo, launchDate: e.target.value })}
+                />
+              </div>
+              <div>
+                <label htmlFor="totalSupply">총 공급량:</label>
+                <input
+                  type="number"
+                  id="totalSupply"
+                  value={currentStockInfo?.totalSupply || ""}
+                  onChange={(e) => setCurrentStockInfo({ ...currentStockInfo, totalSupply: e.target.value })}
+                />
+              </div>
+              <button type="button" onClick={updateCompanyInfo}>저장</button>
+              <button type="button" onClick={() => setEditModalOpen(false)}>닫기</button>
+            </form>
+          </div>
+        </div>
+      )}
+      {deleteModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>정말 삭제하시겠습니까?</h3>
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+              <button
+                className="delete"
+                onClick={confirmDelete}
+              >
+                삭제
+              </button>
+              <button
+                className="cancel"
+                onClick={() => setDeleteModalOpen(false)}
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

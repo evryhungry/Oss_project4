@@ -1,22 +1,19 @@
-import React, { useState } from "react"; // useState를 명시적으로 가져옵니다.
+import React, { useState } from "react";
 import "../css/TradeForm.css";
 
-const TradeForm = ({ stockName, stockPrice, balance, portfolio, onTrade, stockInfo, mockStocks }) => {
+const TradeForm = ({ stockName, stockPrice, balance, portfolio, onTrade, stockInfo, mockStocks, onEdit, onDelete }) => {
   const [quantity, setQuantity] = useState("");
   const [tradeType, setTradeType] = useState("buy");
 
-  // 보유 주식 합산
   const stockData = mockStocks.filter((stock) => stock.name === stockName);
   const totalEA = stockData.reduce((acc, stock) => acc + stock.EA, 0);
   const maxSellable = totalEA;
 
   const handleTrade = () => {
     const totalPrice = stockPrice * Number(quantity);
-    onTrade(tradeType, Number(quantity), totalPrice); // onTrade 호출
+    onTrade(tradeType, Number(quantity), totalPrice);
     setQuantity("");
   };
-
-
 
   return (
     <div className="trade-form">
@@ -72,8 +69,8 @@ const TradeForm = ({ stockName, stockPrice, balance, portfolio, onTrade, stockIn
           <div className="company-header">
             <h3>{stockInfo.name} 회사 정보</h3>
             <div className="company-actions">
-              <button className="edit-button">수정</button>
-              <button className="delete-button">삭제</button>
+              <button className="edit-button" onClick={() => onEdit(stockInfo)}>수정</button>
+              <button className="delete-button" onClick={() => onDelete(stockInfo)}>삭제</button>
             </div>
           </div>
           <div className="company-details">
