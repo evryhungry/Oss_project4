@@ -191,8 +191,77 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
             {stock.name}
           </button>
         ))}
+         <p className="more-symbols">
+          더 많은 심볼을 보고 싶다면 <br />
+          <a
+            href="https://namu.wiki/w/%ED%8B%B0%EC%BB%A4"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            이곳으로!
+          </a>
+        </p>
       </div>
-    </div>
+      {editModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>정보 수정</h3>
+            <form>
+              <div>
+                <label htmlFor="name">회사 이름:</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={currentStockInfo?.name || ""}
+                  onChange={(e) => setCurrentStockInfo({ ...currentStockInfo, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label htmlFor="launchDate">설립일:</label>
+                <input
+                  type="date"
+                  id="launchDate"
+                  value={currentStockInfo?.launchDate || ""}
+                  onChange={(e) => setCurrentStockInfo({ ...currentStockInfo, launchDate: e.target.value })}
+                />
+              </div>
+              <div>
+                <label htmlFor="totalSupply">총 공급량:</label>
+                <input
+                  type="number"
+                  id="totalSupply"
+                  value={currentStockInfo?.totalSupply || ""}
+                  onChange={(e) => setCurrentStockInfo({ ...currentStockInfo, totalSupply: e.target.value })}
+                />
+              </div>
+              <button type="button" onClick={updateCompanyInfo}>저장</button>
+              <button type="button" onClick={() => setEditModalOpen(false)}>닫기</button>
+            </form>
+          </div>
+        </div>
+      )}
+      {deleteModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>정말 삭제하시겠습니까?</h3>
+            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+              <button
+                className="delete"
+                onClick={confirmDelete}
+              >
+                삭제
+              </button>
+              <button
+                className="cancel"
+                onClick={() => setDeleteModalOpen(false)}
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
   );
 };
 
