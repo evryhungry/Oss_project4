@@ -16,7 +16,7 @@ const StockDashboard = ({ balance, onUpdateBalance, portfolio, onUpdatePortfolio
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [currentStockInfo, setCurrentStockInfo] = useState(null);
 
-  const STOCK_API_KEY = "DXW4T0AN8RCFEIEA";
+  const STOCK_API_KEY = "FRGZ0RQC0BBMDSCV";
   const STOCK_API_URL = "https://www.alphavantage.co/query";
 
   const fetchStockData = async (symbol) => {
