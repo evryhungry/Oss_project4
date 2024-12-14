@@ -11,7 +11,7 @@ const Portfolio = ({ portfolio }) => {
   const [selectedStock, setSelectedStock] = useState(null); // 선택된 주식
   const [currentPrices, setCurrentPrices] = useState({}); // 주식별 현재 가격 상태
 
-  const STOCK_API_KEY = "DXW4T0AN8RCFEIEA"; // Alpha Vantage API 키
+  const STOCK_API_KEY = "FRGZ0RQC0BBMDSCV"; // Alpha Vantage API 키
   const STOCK_API_URL = "https://www.alphavantage.co/query"; // Alpha Vantage API URL
 
   // 주식별 현재 가격을 불러오는 함수
