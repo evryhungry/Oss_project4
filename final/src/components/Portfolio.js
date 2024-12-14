@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import "../css/Portfolio.css";
 import axios from "axios";
-import TransactionModal from "./TransactionModal"; // 새로 만든 모달 컴포넌트 임포트
+import TransactionModal from "./TransactionModal";
 
 const MOCK_API_URL = "https://675082c469dc1669ec1b75a8.mockapi.io/api/stocks";
 
 const Portfolio = ({ portfolio }) => {
   const [transactions, setTransactions] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열기/닫기 상태
-  const [selectedStock, setSelectedStock] = useState(null); // 선택된 주식
-  const [currentPrices, setCurrentPrices] = useState({}); // 주식별 현재 가격 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStock, setSelectedStock] = useState(null);
+  const [currentPrices, setCurrentPrices] = useState({});
 
-  const STOCK_API_KEY = "FRGZ0RQC0BBMDSCV"; // Alpha Vantage API 키
-  const STOCK_API_URL = "https://www.alphavantage.co/query"; // Alpha Vantage API URL
+  const STOCK_API_KEY = "FRGZ0RQC0BBMDSCV";
+  const STOCK_API_URL = "https://www.alphavantage.co/query";
 
   // 주식별 현재 가격을 불러오는 함수
   const fetchStockPrice = async (symbol) => {
@@ -27,16 +27,14 @@ const Portfolio = ({ portfolio }) => {
         return;
       }
 
-      const latestDate = Object.keys(timeSeries)[0]; // 최신 날짜 가져오기
-      const latestClosePrice = parseFloat(timeSeries[latestDate]["4. close"]); // 최신 종가
-
+      const latestDate = Object.keys(timeSeries)[0];
+      const latestClosePrice = parseFloat(timeSeries[latestDate]["4. close"]);
       setCurrentPrices((prev) => ({ ...prev, [symbol]: latestClosePrice }));
     } catch (error) {
       console.error("Error fetching stock price:", error);
     }
   };
 
-  // MockAPI에서 거래 내역 데이터를 가져오는 함수
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -51,7 +49,7 @@ const Portfolio = ({ portfolio }) => {
 
     // 보유한 모든 주식에 대해 가격을 불러오기
     Object.keys(portfolio).forEach((stock) => {
-      fetchStockPrice(stock); // 각 주식의 현재 가격 불러오기
+      fetchStockPrice(stock);
     });
   }, [portfolio]);
 
@@ -59,40 +57,67 @@ const Portfolio = ({ portfolio }) => {
   const aggregateTransactions = () => {
     const aggregated = {};
 
-    transactions.forEach(({ name, price, EA, trading_time, type }) => {
+    transactions.forEach(({ name, price, EA, type }) => {
       if (!aggregated[name]) {
         aggregated[name] = {
-          totalSpent: 0, // 총 금액
-          totalQuantity: 0, // 총 수량
-          transactions: [], // 거래 내역 저장
+          totalSpent: 0,
+          totalQuantity: 0,
+          transactions: [],
         };
       }
-      aggregated[name].totalSpent += price * EA; // 금액 합산
-      aggregated[name].totalQuantity += EA; // 수량 합산
-      aggregated[name].transactions.push({ price, EA, trading_time, type }); // 거래 내역 추가
+
+      if (type === "buy") {
+        aggregated[name].totalSpent += price * EA;
+        aggregated[name].totalQuantity += EA;
+      } else if (type === "sell") {
+        aggregated[name].totalSpent -= price * EA;
+        aggregated[name].totalQuantity -= EA;
+      }
+
+      aggregated[name].transactions.push({ price, EA, type });
     });
 
-    return aggregated;
+    // 보유 수량이 0인 주식 필터링
+    return Object.fromEntries(
+      Object.entries(aggregated).filter(([_, data]) => data.totalQuantity > 0)
+    );
   };
 
-  // 포트폴리오 내용을 렌더링하는 함수
+  // 평단가를 계산하는 함수
+  const calculateAveragePrice = (transactions) => {
+    let totalSpent = 0;
+    let totalQuantity = 0;
+
+    transactions.forEach(({ price, EA, type }) => {
+      if (type === "buy") {
+        totalSpent += price * EA;
+        totalQuantity += EA;
+      } else if (type === "sell") {
+        totalSpent -= price * EA;
+        totalQuantity -= EA;
+      }
+    });
+
+    return totalQuantity > 0 ? totalSpent / totalQuantity : 0;
+  };
+
   const renderPortfolio = () => {
-    const aggregated = aggregateTransactions(); // 주식별 합산된 거래 내역
+    const aggregated = aggregateTransactions();
 
     if (Object.keys(aggregated).length === 0) {
-      return <p>현재 보유한 주식이 없습니다.</p>; // 보유 주식이 없을 때 메시지
+      return <p>현재 보유한 주식이 없습니다.</p>;
     }
 
     return Object.entries(aggregated).map(([stock, { totalSpent, totalQuantity, transactions }]) => {
-      const averagePrice = totalSpent / totalQuantity; // 평단가 계산
-      const currentPrice = currentPrices[stock] || 0; // 현재 가격
+      const averagePrice = calculateAveragePrice(transactions);
+      const currentPrice = currentPrices[stock] || 0;
       const priceChangePercent = currentPrice
-        ? ((currentPrice - averagePrice) / averagePrice) * 100 // 가격 변화 비율 계산
+        ? ((currentPrice - averagePrice) / averagePrice) * 100
         : 0;
 
       return (
         <div key={stock} className="portfolio-item">
-          <h3 onClick={() => openModal(stock, transactions)}>{stock}</h3> {/* 주식 이름 클릭 시 모달 열기 */}
+          <h3 onClick={() => openModal(stock, transactions)}>{stock}</h3>
           <p>보유량: {totalQuantity}주</p>
           <p>평단가: ${averagePrice.toFixed(2)}</p>
           <p>
@@ -107,29 +132,26 @@ const Portfolio = ({ portfolio }) => {
     });
   };
 
-  // 모달 열기 함수
   const openModal = (stock, transactions) => {
-    setSelectedStock({ stock, transactions }); // 선택된 주식과 거래 내역 저장
-    setIsModalOpen(true); // 모달 열기
+    setSelectedStock({ stock, transactions });
+    setIsModalOpen(true);
   };
 
-  // 모달 닫기 함수
   const closeModal = () => {
-    setIsModalOpen(false); // 모달 닫기
-    setSelectedStock(null); // 선택된 주식 초기화
+    setIsModalOpen(false);
+    setSelectedStock(null);
   };
 
   return (
     <div className="portfolio">
       <h2>투자내역</h2>
-      <div className="portfolio-list">{renderPortfolio()}</div> {/* 포트폴리오 목록 렌더링 */}
+      <div className="portfolio-list">{renderPortfolio()}</div>
 
-      {/* 거래 내역 모달 */}
       {isModalOpen && selectedStock && (
         <TransactionModal
-          stock={selectedStock.stock} // 선택된 주식명
-          transactions={selectedStock.transactions} // 선택된 주식의 거래 내역
-          onClose={closeModal} // 모달 닫기 함수
+          stock={selectedStock.stock}
+          transactions={selectedStock.transactions}
+          onClose={closeModal}
         />
       )}
     </div>

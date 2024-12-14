@@ -5,13 +5,26 @@ const TradeForm = ({ stockName, stockPrice, balance, portfolio, onTrade, stockIn
   const [quantity, setQuantity] = useState("");
   const [tradeType, setTradeType] = useState("buy");
 
+  // mockStocks에서 현재 주식 데이터 필터링
   const stockData = mockStocks.filter((stock) => stock.name === stockName);
-  const totalEA = stockData.reduce((acc, stock) => acc + stock.EA, 0);
+
+  // type에 따라 매도 데이터를 음수로 계산
+  const totalEA = stockData.reduce((acc, stock) => {
+    const adjustedEA = stock.type === "sell" ? -stock.EA : stock.EA;
+    return acc + adjustedEA;
+  }, 0);
+
+  // 매도 가능 수량 설정
   const maxSellable = totalEA;
 
   const handleTrade = () => {
-    const totalPrice = stockPrice * Number(quantity);
-    onTrade(tradeType, Number(quantity), totalPrice);
+    console.log("입력된 수량 값:", quantity);
+    const parsedQuantity = Number(quantity);
+    if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+      alert("유효한 수량을 입력해주세요.");
+      return;
+    }
+    onTrade(tradeType, parsedQuantity); // 순서를 맞춰서 호출 (quantity만 전달)
     setQuantity("");
   };
 
@@ -48,7 +61,10 @@ const TradeForm = ({ stockName, stockPrice, balance, portfolio, onTrade, stockIn
         <input
           type="number"
           value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
+          onChange={(e) => {
+            console.log("입력된 수량 값:", e.target.value); // 디버깅용 로그
+            setQuantity(e.target.value);
+          }}
           placeholder="수량 입력"
         />
         <button
